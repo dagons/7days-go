@@ -1,25 +1,20 @@
 package gee
 
 import (
-	"fmt"
 	"net/http"
 )
 
-//路由指向的方法
-type HandlerFunc func(http.ResponseWriter, *http.Request)
-
 //框架引擎主体
 type Engine struct {
-	route map[string]HandlerFunc
+	route *Route
 }
 
 func New() *Engine {
-	return &Engine{route: make(map[string]HandlerFunc)}
+	return &Engine{route: newRoute()}
 }
 
 func (engine *Engine) addRoute(method string, pattern string, handler HandlerFunc) {
-	key := method + "_" + pattern
-	engine.route[key] = handler
+	engine.route.addRoute(method, pattern, handler)
 }
 
 func (engine *Engine) GET(pattern string, handler HandlerFunc) {
@@ -32,12 +27,8 @@ func (engine *Engine) POST(pattern string, handler HandlerFunc) {
 
 //实现ServeHTTP方法 满足Handler接口
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	key := req.Method + "_" + req.URL.Path
-	if handler, ok := engine.route[key]; ok {
-		handler(w, req)
-	} else {
-		fmt.Fprintf(w, "404")
-	}
+	c := newContext(w, req)
+	engine.route.handle(c)
 }
 
 func (engine *Engine) Run(addr string) (err error) {
