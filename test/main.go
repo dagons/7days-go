@@ -1,8 +1,26 @@
 package main
 
+import (
+	"fmt"
+)
+
+func d()(t int){
+	defer func(i int){
+		fmt.Println(i)
+		fmt.Println(t)
+	}(t)
+	return 2
+}
+
+func d2()(t int){
+	defer func(i int){
+		fmt.Println(i)
+		fmt.Println(t)
+	}(t)
+	t = 1
+	return 1
+}
 func main() {
-	a := [...]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	x := a[0:10]
-	println(len(x))
-	println(cap(x))
+	d()
+	d2()
 }
